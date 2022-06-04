@@ -1396,7 +1396,7 @@ static int getcompoundop(LexState *ls, BinOpr *op) {
       return 1;
     }
     case '\\': {
-      *op = OPR_IDIV;   /* integer division */
+      *op = OPR_IDIV;  /* integer division */
       return 1;
     }
     case '|': {
@@ -1431,19 +1431,29 @@ static int getcompoundop(LexState *ls, BinOpr *op) {
 */ 
 static void compoundassign(LexState *ls, expdesc* v, BinOpr op) {
   luaX_next(ls);
-  int line;
+  int line = ls->linenumber;
   FuncState *fs = ls->fs;
   expdesc e = *v, v2;
-  luaK_reserveregs(fs, fs->freereg-fs->nactvar);
-  line = ls->linenumber;
-  enterlevel(ls);
-  luaK_infix(fs, op, &e);
-  expr(ls, &v2);
-  luaK_posfix(fs, op, &e, &v2, line);
-  leavelevel(ls);
-  luaK_exp2nextreg(fs, &e);
-  luaK_setoneret(ls->fs, &e);
-  luaK_storevar(ls->fs, v, &e);
+  if (v->k != VLOCAL) {  /* complex lvalue expression, use a temporary register to optimize */
+    luaK_reserveregs(fs, fs->freereg-fs->nactvar);
+    enterlevel(ls);
+    luaK_infix(fs, op, &e);
+    expr(ls, &v2);
+    luaK_posfix(fs, op, &e, &v2, line);
+    leavelevel(ls);
+    luaK_exp2nextreg(fs, &e);
+    luaK_setoneret(ls->fs, &e);
+    luaK_storevar(ls->fs, v, &e);
+  }
+  else {  /* simple lvalue expression, i.e a local. avoid register and directly change value */
+    enterlevel(ls);
+    luaK_infix(fs, op, &e);
+    expr(ls, &v2);
+    luaK_posfix(fs, op, &e, &v2, line);
+    leavelevel(ls);
+    luaK_setoneret(ls->fs, &e);
+    luaK_storevar(ls->fs, v, &e);
+  }
 }
 
 /*
