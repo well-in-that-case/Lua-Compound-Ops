@@ -529,78 +529,6 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (check_next1(ls, '=')) return TK_NE;  /* '~=' */
         else return '~';
       }
-      case '+': {
-        int c = ls->current;
-        next(ls);
-        if (check_next1(ls, '=')) {  /* compound support */
-          ls->lasttoken = '+';
-          return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
-      }
-      case '*': {
-        int c = ls->current;
-        next(ls);
-        if (check_next1(ls, '=')) {  /* compound support */
-          ls->lasttoken = '*';
-          return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
-      }
-      case '%': {
-        int c = ls->current;
-        next(ls);
-        if (check_next1(ls, '=')) {  /* compound support */
-          ls->lasttoken = '%';
-          return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
-      }
-      case '^': {
-        int c = ls->current;
-        next(ls);
-        if (check_next1(ls, '=')) {  /* compound support */
-          ls->lasttoken = '^';
-          return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
-      }
-      case '&': {
-        int c = ls->current;
-        next(ls);
-        if (check_next1(ls, '=')) {  /* compound support */
-          ls->lasttoken = '&';
-          return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
-      }
-      case '|': {
-        int c = ls->current;
-        next(ls);
-        if (check_next1(ls, '=')) {  /* compound support */
-          ls->lasttoken = '|';
-          return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
-      }
       case ':': {
         next(ls);
         if (check_next1(ls, ':')) return TK_DBCOLON;  /* '::' */
@@ -624,6 +552,22 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       case '5': case '6': case '7': case '8': case '9': {
         return read_numeral(ls, seminfo);
       }
+      /* compound support */
+      case '+': case '*': 
+      case '^': case '%':
+      case '|': case '&': { 
+        int c = ls->current;
+        next(ls);
+        if (check_next1(ls, '=')) {
+          ls->lasttoken = c;
+          return '=';
+        }
+        else {
+          next(ls);
+          return c;
+        }
+      }
+      /* end of compound support */
       case EOZ: {
         return TK_EOS;
       }
