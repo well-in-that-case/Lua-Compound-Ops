@@ -1366,24 +1366,59 @@ static void check_conflict (LexState *ls, struct LHS_assign *lh, expdesc *v) {
 /*
   gets the supported binary compound operation (if any)
   gives OPR_NOBINOPR if the operation does not have compound support.
+  returns a status (0 false, 1 true) and takes a pointer to set.
+  this allows for seamless conditional implementation, avoiding a getcompoundop call for every Lua assignment.
 */
-static BinOpr getcompoundop(LexState *ls) {
+static int getcompoundop(LexState *ls, BinOpr *op) {
   switch (ls->lasttoken) {
-    /* arithmetic operators */
-    case '+': return OPR_ADD;     /* addition */ 
-    case '-': return OPR_SUB;     /* subtraction */
-    case '*': return OPR_MUL;     /* multiplication */
-    case '%': return OPR_MOD;     /* modulo */
-    case '^': return OPR_POW;     /* power */
-    case '/': return OPR_DIV;     /* float division */
-    case '\\': return OPR_IDIV;   /* integer division */
-    /* bitwise operators */
-    case '|': return OPR_BOR;     /* bitwise OR */
-    case '&': return OPR_BAND;    /* bitwise AND */
-    case '<': return OPR_SHL;     /* shift left */
-    case '>': return OPR_SHR;     /* shift right */
-    /* ls->lasttoken is unsupported */
-    default: return OPR_NOBINOPR;
+    case '+': {
+      *op = OPR_ADD;  /* addition */
+      return 1;
+    }
+    case '-': {
+      *op = OPR_SUB;  /* subtraction */
+      return 1;
+    }
+    case '*': {
+      *op = OPR_MUL;  /* multiplication */
+      return 1;
+    }
+    case '%': {
+      *op = OPR_MOD;  /* modulo */
+      return 1;
+    }
+    case '^': {
+      *op = OPR_POW;  /* power */
+      return 1;
+    }
+    case '/': {
+      *op = OPR_DIV;  /* float division */
+      return 1;
+    }
+    case '\\': {
+      *op = OPR_IDIV;   /* integer division */
+      return 1;
+    }
+    case '|': {
+      *op = OPR_BOR;  /* bitwise OR */
+      return 1;
+    }
+    case '&': {
+      *op = OPR_BAND;  /* bitwise AND */
+      return 1;
+    }
+    case '<': {
+      *op = OPR_SHL;  /* shift left */
+      return 1; 
+    }
+    case '>': {
+      *op = OPR_SHR; /* shift right */
+      return 1;
+    }
+    default: {
+      *op = OPR_NOBINOPR;
+      return 0;
+    }
   }
 }
 
@@ -1431,15 +1466,15 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
     leavelevel(ls);
   }
   else {  /* restassign -> '=' explist */
-    int nexps;
-    BinOpr op = getcompoundop(ls);  /* get binop from lexer state token (ls->lasttoken) */
-    if (op != OPR_NOBINOPR) {  /* is this binop supported? */
+    BinOpr op;  /* binary operation from lexer state */
+    int token = ls->lasttoken; /* lexer state token */
+    if (token != 0 && getcompoundop(ls, &op) != 0) {  /* is there a saved binop? */
       compoundassign(ls, &lh->v, op);  /* perform binop & assignment */
       ls->lasttoken = 0;  /* clear last token from lexer state */
       return;  /* avoid default */
     }
-    else if (testnext(ls, '=')) { 
-      nexps = explist(ls, &e);
+    else if (testnext(ls, '=')) { /* no requested binop, continue */
+      int nexps = explist(ls, &e);
       if (nexps != nvars)
         adjust_assign(ls, nvars, nexps, &e);
       else {
