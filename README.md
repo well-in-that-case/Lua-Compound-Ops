@@ -25,7 +25,7 @@ The bytecode produced by these operators is identical to their manual counter-pa
 - If a saved lexer state token exists (>0), then the `compound_assignment` function performs the operation.
 - Afterwards, the `restassign` function resets the lexer state token (`ls->lasttoken`) for the next operation.
 
-This is remarkably simple, taking ~1-3kb of code depending on how you optimize, expand, or secure it.
+This is remarkably simple, taking 3-4kb of code depending on how you optimize, expand, or secure it.
 There are no new symbols, opcodes, metamethods. There's no problems with complex lvalue expressions.
 
 ### To-Do
