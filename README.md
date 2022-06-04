@@ -15,9 +15,9 @@
 
 ### Lua Compatibility
 The bytecode produced by these operators is almost identical to their manual counter-parts (i.e, `a = a + 1`).
-Compound assignment operators are typically faster with complex lvalue expressions. Conversly, simple lvalue expressions — for example, a simple local — are slower.
+Compound assignment operators are typically faster with complex lvalue expressions, and they offer the same performance with simple lvalue expressions (i.e, a local).
 
-Simple lvalue expressions produce an extra MOVE opcode because this fork performs inside a temporary register, then moves the value into your object. Conversly, Lua optimizes manual expressions (`a = a + 5`) to directly modify the value. Complex lvalue expressions require less lookups because the temporary register will remember the value & share it, instead of requesting it twice.
+Complex lvalue expressions require less lookups because the temporary register will remember the value & share it, instead of requesting it twice. Lua optimizes manual expressions (`a = a + 5`) to directly modify the value, and an optimization inside the `compoundassign` function allows Lua to perform this optimization on locals, then allows the aforementioned temporary register optimization otherwise. This is a win-win scenario.
 
 Take this example code:
 ```lua
@@ -37,7 +37,7 @@ for i = 1, 10000000 do
 end
 print(os.clock() - start)
 ```
-It takes only ~850ms to process. Compound operators offer a 48.8% performance increase with complex lvalue expressions.
+It takes only ~850ms to process. Compound operators offer a 48.8% performance increase with complex lvalue expressions which will scale linearly with lvalue complexity.
 
 ### Implementation Detail
 - This implementation does not require additional reserved symbols.
