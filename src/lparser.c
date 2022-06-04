@@ -1430,13 +1430,13 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
   }
   else {  /* restassign -> '=' explist */
     int nexps;
-    BinOpr op = getcompoundop(ls);
-    if (op != OPR_NOBINOPR) {
-      compoundassign(ls, &lh->v, op);
-      ls->lasttoken = 0;
+    BinOpr op = getcompoundop(ls);  /* get binop from lexer state token (ls->lasttoken) */
+    if (op != OPR_NOBINOPR) {  /* is this binop supported? */
+      compoundassign(ls, &lh->v, op);  /* perform binop & assignment */
+      ls->lasttoken = 0;  /* clear last token from lexer state */
       return;  /* avoid default */
     }
-    else if (testnext(ls, '=')) {
+    else if (testnext(ls, '=')) { 
       nexps = explist(ls, &e);
       if (nexps != nvars)
         adjust_assign(ls, nvars, nexps, &e);
