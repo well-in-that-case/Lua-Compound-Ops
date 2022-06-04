@@ -1,15 +1,18 @@
 # Lua 5.4.4
 ## Compound Operator Support
-### New Operators:
-- `+=`
-- `-=`
-- `^=`
-- `%=`
-- `*=`
-- `/=`
-- `|=`
-- `&=`
-- `//=`
+### New Compound Operators:
+- Modulo: `%=`
+- Addition: `+=`
+- Exponent: `^=`
+- Bitwise OR: `|=`
+- Subtraction: `-=`
+- Bitwise AND: `&=`
+- Float division: `/=`
+- Multiplication: `*=`
+- Integer division: `//=`
+
+### Lua Compatibility
+The bytecode produced by these operators is identical to their manual counter-parts (i.e, `a = a + 1`).
 
 ### Implementation Detail
 - This implementation does not require additional reserved symbols.
