@@ -1,0 +1,58 @@
+-- This is normal Lua, but I change the extension so my linter doesn't yell at me.
+
+-- [[ += ]] --
+local a = 5
+a += 20
+assert(a == 25)
+
+-- [[ -= ]] --
+local b = 100
+b -= 200
+assert(b == -100)
+
+-- [[ %= ]] --
+local c = 5
+c %= 2
+assert(c == 1)
+
+-- [[ ^= ]] --
+local d = 5
+d ^= 2
+assert(d == 25.0)
+
+-- [[ |= ]] --
+local e = 5
+e |= 2
+assert(e == 7)
+
+-- [[ <<= ]] --
+local f = 5
+f <<= 2
+assert(f == 20)
+
+-- [[ &= ]] --
+local g = 5
+g &= 6
+assert(g == 4)
+
+-- [[ /= ]] --
+local h = 20
+h /= 5
+assert(h == 4.0)
+
+-- [[ >>= ]] --
+local i = 5
+i >>= 1
+assert(i == 2)
+
+-- [[ *= ]] --
+local j = 5
+j *= 4
+assert(j == 20)
+
+-- [[ //= ]] --
+local k = 20
+k //= 5
+assert(k == 4)
+
+print("Successful test.")
