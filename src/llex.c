@@ -578,11 +578,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
         if (check_next1(ls, '=')) {
           ls->lasttoken = c;
           return '=';
-        }
-        else {
-          next(ls);
-          return c;
-        }
+        } else return c;
       }
       /* end of compound support */
       case EOZ: {
