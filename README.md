@@ -14,7 +14,10 @@
 - Integer division: `//=`
 
 ### Lua Compatibility
-The bytecode produced by these operators is identical to their manual counter-parts (i.e, `a = a + 1`).
+The bytecode produced by these operators is almost identical to their manual counter-parts (i.e, `a = a + 1`).
+Compound assignment operators are typically faster with complex lvalue expressions. Conversly, simple lvalue expressions — for example, a simple local — are slower. Keep in mind, this is a sub-nanosecond difference.
+
+Simple lvalue expressions produce an extra MOVE opcode because this fork performs inside a temporary register, then moves the value into your object. Conversly, Lua optimizes manual expressions (`a = a + 5`) to directly modify the value. Complex lvalue expressions require less lookups because the temporary registers remember the value, typically avoiding hash lookups. One could argue this is a net performance increase, but the difference is overwhelmingly unnoticable.
 
 ### Implementation Detail
 - This implementation does not require additional reserved symbols.
