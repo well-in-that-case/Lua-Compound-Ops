@@ -1373,13 +1373,15 @@ static BinOpr getcompoundop(LexState *ls) {
     case '+': return OPR_ADD;     /* addition */ 
     case '-': return OPR_SUB;     /* subtraction */
     case '*': return OPR_MUL;     /* multiplication */
-    case '%': return OPR_MOD;     /* modulo (not working) */
-    case '^': return OPR_POW;     /* power (not working) */
+    case '%': return OPR_MOD;     /* modulo */
+    case '^': return OPR_POW;     /* power */
     case '/': return OPR_DIV;     /* float division */
     case '\\': return OPR_IDIV;   /* integer division */
     /* bitwise operators */
     case '|': return OPR_BOR;     /* bitwise OR */
     case '&': return OPR_BAND;    /* bitwise AND */
+    case '<': return OPR_SHL;     /* shift left */
+    case '>': return OPR_SHR;     /* shift right */
     /* ls->lasttoken is unsupported */
     default: return OPR_NOBINOPR;
   }

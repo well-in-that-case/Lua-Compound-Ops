@@ -6,8 +6,10 @@
 - Exponent: `^=`
 - Bitwise OR: `|=`
 - Subtraction: `-=`
+- Bitshift left: `<<=`
 - Bitwise AND: `&=`
 - Float division: `/=`
+- Bitshift right: `>>=`
 - Multiplication: `*=`
 - Integer division: `//=`
 

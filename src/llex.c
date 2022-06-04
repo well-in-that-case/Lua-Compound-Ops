@@ -496,14 +496,30 @@ static int llex (LexState *ls, SemInfo *seminfo) {
       }
       case '<': {
         next(ls);
-        if (check_next1(ls, '=')) return TK_LE;  /* '<=' */
-        else if (check_next1(ls, '<')) return TK_SHL;  /* '<<' */
+        if (check_next1(ls, '=')) {
+          return TK_LE;  /* '<=' */
+        }
+        else if (check_next1(ls, '<')) {
+          if (check_next1(ls, '=')) {  /* compound support */
+            ls->lasttoken = '<';
+            return '=';
+          }
+          else return TK_SHL;  /* '<<' */
+        }
         else return '<';
       }
       case '>': {
         next(ls);
-        if (check_next1(ls, '=')) return TK_GE;  /* '>=' */
-        else if (check_next1(ls, '>')) return TK_SHR;  /* '>>' */
+        if (check_next1(ls, '=')) {
+          return TK_GE;  /* '>=' */
+        }
+        else if (check_next1(ls, '>')) {
+          if (check_next1(ls, '=')) {  /* compound support */
+            ls->lasttoken = '>';
+            return '=';
+          }
+          else return TK_SHR;  /* '>>' */
+        }
         else return '>';
       }
       case '/': {
