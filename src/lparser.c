@@ -1315,7 +1315,7 @@ static void block (LexState *ls) {
 ** assignment
 */
 struct LHS_assign {
-  struct LHS_assign *prev;
+  struct LHS_assign *prev, *next; /* previous & next lhs objects */
   expdesc v;  /* variable (global, local, upvalue, or indexed) */
 };
 
@@ -1434,7 +1434,7 @@ static void compoundassign(LexState *ls, expdesc* v, BinOpr op) {
   int line = ls->linenumber;
   FuncState *fs = ls->fs;
   expdesc e = *v, v2;
-  if (v->k != VLOCAL) {  /* complex lvalue expression, use a temporary register to optimize */
+  if (v->k != VLOCAL) {  /* complex lvalue, use a temporary register. linear perf incr. with complexity of lvalue */
     luaK_reserveregs(fs, fs->freereg-fs->nactvar);
     enterlevel(ls);
     luaK_infix(fs, op, &e);
@@ -1445,7 +1445,7 @@ static void compoundassign(LexState *ls, expdesc* v, BinOpr op) {
     luaK_setoneret(ls->fs, &e);
     luaK_storevar(ls->fs, v, &e);
   }
-  else {  /* simple lvalue expression, i.e a local. avoid register and directly change value */
+  else {  /* simple lvalue; a local. directly change value (~20% speedup vs temporary register) */
     enterlevel(ls);
     luaK_infix(fs, op, &e);
     expr(ls, &v2);
@@ -1468,6 +1468,8 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
   if (testnext(ls, ',')) {  /* restassign -> ',' suffixedexp restassign */
     struct LHS_assign nv;
     nv.prev = lh;
+    nv.next = NULL;
+    lh->next = &nv;
     suffixedexp(ls, &nv.v);
     if (!vkisindexed(nv.v.k))
       check_conflict(ls, lh, &nv.v);
@@ -1479,6 +1481,7 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
     BinOpr op;  /* binary operation from lexer state */
     int token = ls->lasttoken; /* lexer state token */
     if (token != 0 && getcompoundop(ls, &op) != 0) {  /* is there a saved binop? */
+      check_condition(ls, nvars == 1, "unsupported tuple assignment");
       compoundassign(ls, &lh->v, op);  /* perform binop & assignment */
       ls->lasttoken = 0;  /* clear last token from lexer state */
       return;  /* avoid default */
